@@ -1,0 +1,23 @@
+{
+  "name": "vehicle-service-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:ci": "turbo run lint:ci",
+    "test": "turbo run test",
+    "db:generate": "turbo run db:generate"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.5.4"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "npm@11.9.0"
+}
