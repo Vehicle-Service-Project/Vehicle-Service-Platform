@@ -1,0 +1,37 @@
+# dependencies
+node_modules
+
+# build
+dist
+build
+.turbo
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# env
+.env
+.env.*
+!.env.example
+
+# test
+coverage
+.nyc_output
+
+# prisma (generated clients)
+apps/*/generated
+
+# OS
+.DS_Store
+
+# IDE
+.idea
+
+# temp
+.temp
+.tmp
+
+# diagnostics
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
