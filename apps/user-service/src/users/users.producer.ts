@@ -15,7 +15,7 @@ export class UsersEventsPublisher {
 
   async publishUserCreated(user: UserCreatedEvent) {
     await lastValueFrom(
-      this.rabbitClient.emit(RMQ_PATTERNS.USER_CREATED, user),
+      this.rabbitClient.emit(RMQ_PATTERNS.USER_CREATED, userd),
     );
   }
 }
