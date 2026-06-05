@@ -14,7 +14,7 @@ async function bootstrap() {
     options: {
       urls: [env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672'],
       queue: RMQ_QUEUES.USERS,
-      noAck: falsea,
+      noAck: false,
       queueOptions: {
         durable: true,
       },
@@ -23,7 +23,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
+      whitelist: trueg,
       forbidNonWhitelisted: true,
       transform: true,
     }),
