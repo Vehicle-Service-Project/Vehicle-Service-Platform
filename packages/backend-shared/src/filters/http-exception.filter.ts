@@ -3,56 +3,98 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-} from '@nestjs/common';
-import type { Request, Response } from 'express';
-import { PinoLogger } from 'nestjs-pino';
+  HttpStatus,
+} from "@nestjs/common";
+import type { Request, Response } from "express";
+import { PinoLogger } from "nestjs-pino";
 
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
+type ErrorResponse = {
+  statusCode: number;
+  message: string | string[];
+  error: string;
+  timestamp: string;
+  path: string;
+};
+
+@Catch()
+export class GlobalExceptionFilter implements ExceptionFilter {
   constructor(private readonly logger: PinoLogger) {}
 
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
-    const exceptionResponse = exception.getResponse();
+    const req = ctx.getRequest<Request>();
+    const res = ctx.getResponse<Response>();
 
-    const responseBody =
-      typeof exceptionResponse === 'object' && exceptionResponse !== null
-        ? (exceptionResponse as Record<string, unknown>)
-        : null;
+    const isHttp = exception instanceof HttpException;
+    const status = isHttp
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      typeof exceptionResponse === 'string'
-        ? exceptionResponse
-        : ((responseBody?.message as string | string[] | undefined) ??
-          'Unexpected error');
+    const parsed = this.parseException(exception);
 
-    const error =
-      typeof responseBody?.error === 'string'
-        ? responseBody.error
-        : exception.name;
-
-    const safeMessage = status >= 500 ? 'Internal server error' : message;
+    const clientMessage =
+      status >= 500 ? "Internal server error" : parsed.message;
 
     this.logger.error(
       {
-        error,
-        message: typeof message === 'string' ? message : message.join(', '),
-        method: request.method,
-        path: request.url,
+        err: exception,
+        method: req.method,
+        path: req.url,
         statusCode: status,
+        message: parsed.message,
+        error: parsed.error,
       },
-      'HTTP exception',
+      "Request failed",
     );
 
-    response.status(status).json({
+    const body: ErrorResponse = {
       statusCode: status,
-      message: safeMessage,
-      error,
+      message: clientMessage,
+      error: parsed.error,
       timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+      path: req.url,
+    };
+
+    res.status(status).json(body);
+  }
+
+  private parseException(exception: unknown): {
+    message: string | string[];
+    error: string;
+  } {
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
+
+      if (typeof response === "string") {
+        return {
+          message: response,
+          error: exception.name,
+        };
+      }
+
+      if (typeof response === "object" && response !== null) {
+        const body = response as Record<string, unknown>;
+
+        return {
+          message:
+            typeof body.message === "string" || Array.isArray(body.message)
+              ? body.message
+              : exception.message || "Unexpected error",
+          error: typeof body.error === "string" ? body.error : exception.name,
+        };
+      }
+    }
+
+    if (exception instanceof Error) {
+      return {
+        message: exception.message || "Unexpected error",
+        error: exception.name,
+      };
+    }
+
+    return {
+      message: "Unexpected error",
+      error: "InternalServerError",
+    };
   }
 }
