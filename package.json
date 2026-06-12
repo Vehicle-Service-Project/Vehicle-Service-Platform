@@ -26,6 +26,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^17.6.0",
     "prettier": "^3.4.2",
+    "nodemon": "^3.1.10",
     "turbo": "^2.5.4",
     "typescript-eslint": "^8.60.1"
   },

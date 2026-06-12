@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from '@vsp/backend-shared/filters';
+import { GlobalExceptionFilter } from '@vsp/backend-shared/filters';
 import { createPinoConfig, LoggingModule } from '@vsp/backend-shared/logger';
 
-import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
 import { env } from './config/env.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -27,15 +26,11 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     PrismaModule,
     VehiclesModule,
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: PrismaExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_FILTER,
+  //     useClass: GlobalExceptionFilter,
+  //   },
+  // ],
 })
 export class AppModule {}
