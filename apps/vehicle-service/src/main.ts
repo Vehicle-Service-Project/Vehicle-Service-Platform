@@ -1,18 +1,40 @@
-import { NestFactory } from '@nestjs/core';
-
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import type { MicroserviceOptions } from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
+import helmet from 'helmet';
+import { Logger } from 'nestjs-pino';
+
 import { AppModule } from './app.module.js';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { RMQ_QUEUES } from './common/constants/rabbitmq.constants.js';
 import { env } from './config/env.js';
-import { RMQ_QUEUES } from './infrastructure/rabbitmq/rabbitmq.constants.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  app.useLogger(app.get(Logger));
+
+  app.enableShutdownHooks();
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+
+  app.enableCors({
+    origin: env.ALLOWED_ORIGIN,
+  });
+
+  const port = Number(env.PORT ?? 4203);
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672'],
+      urls: [env.RABBITMQ_URL!],
       queue: RMQ_QUEUES.USERS,
       noAck: false,
       queueOptions: {
@@ -30,6 +52,7 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
-  await app.listen(env.PORT ?? 4202);
+  await app.listen(port);
+  app.get(Logger).log(`Vehicle service listening on port ${port}`, 'Bootstrap');
 }
 await bootstrap();

@@ -3,4 +3,13 @@ import 'dotenv/config';
 export const env = {
   DATABASE_URL: process.env.DATABASE_URL,
   RABBITMQ_URL: process.env.RABBITMQ_URL,
+  REDIS_URL: process.env.REDIS_URL,
+  LOG_LEVEL: process.env.LOG_LEVEL ?? 'info',
+  SESSION_SECRET: process.env.SESSION_SECRET,
+  SESSION_COOKIE_NAME: process.env.SESSION_COOKIE_NAME ?? 'vsp.sid',
+  SESSION_TTL_SECONDS: Number(
+    process.env.SESSION_TTL_SECONDS ?? 60 * 60 * 24 * 7,
+  ),
+  NODE_ENV: process.env.NODE_ENV ?? 'development',
+  ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
 };

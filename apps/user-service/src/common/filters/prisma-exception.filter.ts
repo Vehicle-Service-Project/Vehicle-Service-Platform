@@ -1,10 +1,7 @@
-import {
-  Catch,
-  ConflictException,
-  ExceptionFilter,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Catch } from '@nestjs/common';
+import { PrismaExceptionFilterBase } from '@vsp/backend-shared/filters';
+import { PinoLogger } from 'nestjs-pino';
+
 import { Prisma } from '../../../generated/prisma/client.js';
 
 @Catch(
@@ -12,29 +9,12 @@ import { Prisma } from '../../../generated/prisma/client.js';
   Prisma.PrismaClientInitializationError,
   Prisma.PrismaClientValidationError,
 )
-export class PrismaExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown) {
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      switch (exception.code) {
-        case 'P2002':
-          throw new ConflictException('Already exists');
-
-        case 'P2025':
-          throw new NotFoundException('Record not found');
-
-        default:
-          throw exception;
-      }
-    }
-
-    if (exception instanceof Prisma.PrismaClientInitializationError) {
-      throw new InternalServerErrorException('Database connection failed');
-    }
-
-    if (exception instanceof Prisma.PrismaClientValidationError) {
-      throw new InternalServerErrorException('Database validation failed');
-    }
-
-    throw new InternalServerErrorException('Unexpected database error');
+export class PrismaExceptionFilter extends PrismaExceptionFilterBase {
+  constructor(logger: PinoLogger) {
+    super(logger, {
+      KnownRequestError: Prisma.PrismaClientKnownRequestError,
+      InitializationError: Prisma.PrismaClientInitializationError,
+      ValidationError: Prisma.PrismaClientValidationError,
+    });
   }
 }

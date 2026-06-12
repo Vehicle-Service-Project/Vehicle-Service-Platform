@@ -1,23 +1,31 @@
 import { Module } from '@nestjs/common';
-
-import { VehiclesModule } from './vehicles/vehicles.module.js';
-import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
-import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { APP_FILTER } from '@nestjs/core';
-import { LoggerModule } from 'nestjs-pino';
+import { HttpExceptionFilter } from '@vsp/backend-shared/filters';
+import { createPinoConfig, LoggingModule } from '@vsp/backend-shared/logger';
+
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
 import { env } from './config/env.js';
+import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
+import { HealthModule } from './modules/health/health.module.js';
+import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
 
 @Module({
   imports: [
+    LoggingModule.register(
+      createPinoConfig({
+        serviceName: 'vehicle-service',
+        level: env.LOG_LEVEL,
+        nodeEnv: env.NODE_ENV,
+        redactPaths: [
+          'req.headers.authorization',
+          'req.headers.cookie',
+          'res.headers["set-cookie"]',
+        ],
+      }),
+    ),
+    HealthModule,
     PrismaModule,
     VehiclesModule,
-    LoggerModule.forRoot({
-      pinoHttp: {
-        transport:
-          env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
-      },
-    }),
   ],
   providers: [
     {

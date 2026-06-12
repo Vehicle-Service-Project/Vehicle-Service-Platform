@@ -1,0 +1,22 @@
+{
+  "name": "@vsp/backend-shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "default": "./dist/logger/index.js"
+    },
+    "./filters": {
+      "types": "./dist/filters/index.d.ts",
+      "default": "./dist/filters/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

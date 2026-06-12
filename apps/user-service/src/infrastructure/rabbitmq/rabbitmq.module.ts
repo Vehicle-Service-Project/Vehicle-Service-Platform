@@ -1,7 +1,8 @@
-import { env } from '../../config/env.js';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RMQ_QUEUES, RMQ_CLIENTS } from './rabbitmq.constants.js';
+
+import { env } from '../../config/env.js';
+import { RMQ_CLIENTS, RMQ_QUEUES } from './rabbitmq.constants.js';
 
 @Module({
   imports: [
