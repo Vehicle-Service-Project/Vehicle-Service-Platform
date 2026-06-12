@@ -35,17 +35,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const clientMessage =
       status >= 500 ? "Internal server error" : parsed.message;
 
-    this.logger.error(
-      {
-        err: exception,
-        method: req.method,
-        path: req.url,
-        statusCode: status,
-        message: parsed.message,
-        error: parsed.error,
-      },
-      "Request failed",
-    );
+    this.logException(req, status, parsed, exception);
 
     const body: ErrorResponse = {
       statusCode: status,
@@ -56,6 +46,29 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     };
 
     res.status(status).json(body);
+  }
+
+  private logException(
+    req: Request,
+    status: number,
+    parsed: { message: string | string[]; error: string },
+    exception: unknown,
+  ) {
+    const payload: Record<string, unknown> = { statusCode: status };
+
+    if (exception instanceof Error) {
+      payload.err = exception;
+    } else {
+      payload.message = parsed.message;
+      payload.error = parsed.error;
+    }
+
+    const logMessage = `${req.method} ${req.url} → ${status} ${parsed.error}`;
+    const log =
+      status >= 500
+        ? this.logger.error.bind(this.logger)
+        : this.logger.warn.bind(this.logger);
+    log(payload, logMessage);
   }
 
   private parseException(exception: unknown): {

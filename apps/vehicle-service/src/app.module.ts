@@ -26,11 +26,11 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     PrismaModule,
     VehiclesModule,
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_FILTER,
+  //     useClass: GlobalExceptionFilter,
+  //   },
+  // ],
 })
 export class AppModule {}

@@ -22,7 +22,7 @@ npm run dev
 
 `npm i` builds `@vsp/backend-shared` automatically via its `prepare` script, so TypeScript and the IDE can resolve shared imports immediately.
 
-`npm run dev` rebuilds workspace dependencies (via Turbo `^build`) before starting apps, and runs `tsc --watch` on `@vsp/backend-shared` so changes to shared code rebuild `dist/` automatically.
+`npm run dev` rebuilds workspace dependencies (via Turbo `^build`) before starting apps. Shared package changes apply after `tsc --watch` rebuilds `dist/` and nodemon restarts the affected Nest service.
 
 ## Local infrastructure (Docker)
 
@@ -64,7 +64,7 @@ docker compose -f docker.compose.yml up -d
 
 ## Shared package note
 
-`@vsp/backend-shared` exports compiled output from `dist/`, not TypeScript source. During `npm run dev`, Turbo runs `tsc --watch` on the shared package alongside app dev servers — edits under `packages/backend-shared/src` rebuild automatically. To rebuild manually:
+During local dev, `tsc --watch` on `@vsp/backend-shared` rebuilds `dist/`; nodemon restarts Nest apps when `dist/` or app `src/` changes. To rebuild manually:
 
 ```bash
 npm run build -w @vsp/backend-shared
