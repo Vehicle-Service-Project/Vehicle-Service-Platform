@@ -33,6 +33,9 @@
     "**/generated": true,
     "**/node_modules": true
   },
+  "json.schemaDownload.trustedDomains": {
+    "https://turbo.build/": true
+  },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma",
     "editor.formatOnSave": true
